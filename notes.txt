@@ -4,4 +4,3 @@ Short term goals:
 - single level generation
 - level exploration
 
-
