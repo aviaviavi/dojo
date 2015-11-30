@@ -4,7 +4,7 @@ var Viewport = function(viewportWidth, viewportHeight) {
 	this.x = 0;
 	this.y = 0;
 
-}
+};
 
 var Dungeon = function(dungeonWidth, dungeonHeight, viewportWidth, viewportHeight) {
 
@@ -26,7 +26,7 @@ var Dungeon = function(dungeonWidth, dungeonHeight, viewportWidth, viewportHeigh
 			visible: false
 		};
 	});
-}
+};
 
 Dungeon.prototype.render = function(display) {
 	for (var x = 0; x < this.viewport.width; x++) {
@@ -36,16 +36,16 @@ Dungeon.prototype.render = function(display) {
 			display.draw(x, y, this.level[rendX][rendY].type);
 		}
 	}
-}
+};
 
 Dungeon.prototype.isWall = function(x, y) {
 	return (this.level[x][y].type === this.WALL);
-}
+};
 
 Dungeon.prototype.centerViewport = function(x, y) {
 	this.viewport.x = x - this.viewport.width / 2;
 	this.viewport.y = y - this.viewport.height / 2;
 
 	// TODO: check for bounds to make sure viewport doesn't extend beyond bounds
-}
+};
 

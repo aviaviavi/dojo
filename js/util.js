@@ -8,4 +8,4 @@ Array.matrix = function(numrows, numcols, initial) {
 		arr[i] = columns;
 	}
 	return arr;
-}
+};
