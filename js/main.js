@@ -1,49 +1,42 @@
 var display;
-var mazeWidth = 100;
-var mazeHeight = 20;
-var playerX;
-var playerY;
+var mazeWidth = 300;
+var mazeHeight = 300;
+var viewportWidth = 30;
+var viewportHeight = 20;
+var player;
+var dungeon;
 
-var level = Array.matrix(mazeWidth, mazeHeight, {});
 
 $(function() {
 	ROT.RNG.setSeed(1234);
-	var map = new ROT.Map.Digger(mazeWidth, mazeHeight, {
-		dugPercentage: 0.2
+
+	dungeon = new Dungeon(mazeWidth, mazeHeight, viewportWidth, viewportHeight);
+
+	display = new ROT.Display({
+		width: viewportWidth,
+		height: viewportHeight,
+		fontSize: 24,
+		spacing: 1
 	});
-	display = new ROT.Display({width:mazeWidth, height:mazeHeight});
 	$("body").append(display.getContainer());
 
-	map.create(testMazeCallback);
-
 	// place player
-	var room = map.getRooms().random();
+	var room = dungeon.map.getRooms().random();
 	var center = room.getCenter();
-	playerX = center[0];
-	playerY = center[1];
+	player = new Player(center[0], center[1]);
 
 	bindEvents();
 
 	render();
 
-
-
 });
 
-function testMazeCallback(x, y, wall) {
-	level[x][y] = {
-		type: wall ? "#" : ".",
-		visible: false
-	};
-}
-
 function render() {
-	for (var x = 0; x < mazeWidth; x++) {
-		for (var y=0; y < mazeHeight; y++) {
-			display.draw(x, y, level[x][y].type);
-		}
-	}
-	display.draw(playerX, playerY, "@", "#0f0");
+
+	dungeon.centerViewport(player.posX, player.posY);
+	dungeon.render(display);
+
+	player.render(display, dungeon.viewport);
 }
 
 function bindEvents() {
@@ -61,21 +54,37 @@ function bindEvents() {
 }
 
 function handleKeyPress(key) {
+	var reRender = false;
 	switch (key) {
 		case "VK_UP":
-			playerY--;
+			reRender = moveRelative(0, -1);
 			break;
 		case "VK_DOWN":
-			playerY++;
+			reRender = moveRelative(0, 1);
 			break;
 		case "VK_LEFT":
-			playerX--;
+			reRender = moveRelative(-1, 0);
 			break;
 		case "VK_RIGHT":
-			playerX++;
+			reRender = moveRelative(1, 0);
 			break;
 		default:
 			break;
 	}
-	render();
+	if (reRender) {
+		render();
+	}
 }
+
+// If the player can move, move them.  Return true if moved, false if not.
+function moveRelative(x, y) {
+	var newX = player.posX + x;
+	var newY = player.posY + y;
+	if (!dungeon.isWall(newX, newY)) {
+		player.posX = newX;
+		player.posY = newY;
+		return true;
+	}
+	return false;
+}
+
