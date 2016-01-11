@@ -5,12 +5,18 @@ var viewportWidth = 30;
 var viewportHeight = 20;
 var player;
 var dungeon;
-
+var items;
 
 $(function() {
 	ROT.RNG.setSeed(1234);
 
 	dungeon = new Dungeon(mazeWidth, mazeHeight, viewportWidth, viewportHeight);
+
+	// items
+	items = createTestItems();
+	$.each(items, function(index, item) {
+		dungeon.addItem(item);
+	});
 
 	display = new ROT.Display({
 		width: viewportWidth,
@@ -27,20 +33,32 @@ $(function() {
 
 	bindEvents();
 
-	render();
+	turn();
 
 });
+
+function createTestItems() {
+	var items = [];
+	// iterate through rooms, placing a test item per room
+	var rooms = dungeon.map.getRooms();
+	for (var i=0; i < rooms.length; i++) {
+		var room = rooms[i];
+		var x = Math.floor(Math.random() * (room.getRight() - room.getLeft()) + room.getLeft());
+		var y = Math.floor(Math.random() * (room.getBottom() - room.getTop()) + room.getTop());
+		items.push(new Item(x, y, 'T'));
+	}
+	return items;
+}
 
 function render() {
 
 	dungeon.centerViewport(player.posX, player.posY);
 	dungeon.render(display);
-
 	player.render(display, dungeon.viewport);
 }
 
 function bindEvents() {
-	$(document).on('keyup', function (e) {
+	$(document).on('keydown', function (e) {
 		var code = e.keyCode;
 		var vk = "?";
 		for (var name in ROT) {
@@ -71,9 +89,23 @@ function handleKeyPress(key) {
 		default:
 			break;
 	}
-	if (reRender) {
-		render();
-	}
+	turn();
+}
+
+function turn() {
+	dungeon.calculateFov(player.posX, player.posY);
+	render();
+
+	processEvents();
+}
+
+function processEvents() {
+	// collision detection
+	$.each(items, function(idx, item) {
+		if (player.posX === item.posX && player.posY === item.posY) {
+			item.collide(player, dungeon);
+		}
+	});
 }
 
 // If the player can move, move them.  Return true if moved, false if not.

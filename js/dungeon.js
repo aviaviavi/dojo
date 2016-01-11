@@ -1,3 +1,4 @@
+
 var Viewport = function(viewportWidth, viewportHeight) {
 	this.width = viewportWidth;
 	this.height = viewportHeight;
@@ -9,6 +10,7 @@ var Viewport = function(viewportWidth, viewportHeight) {
 var Dungeon = function(dungeonWidth, dungeonHeight, viewportWidth, viewportHeight) {
 
 	this.WALL = "#";
+	this.fovRadius = 3;
 
 	this.width = dungeonWidth;
 	this.height = dungeonHeight;
@@ -26,6 +28,27 @@ var Dungeon = function(dungeonWidth, dungeonHeight, viewportWidth, viewportHeigh
 			visible: false
 		};
 	});
+
+	// Don't allow see-through walls, so if the character is a wall
+	// block the light/visibility
+	var dungeon = this;
+	var lightPasses = function(x, y) {
+		if (dungeon.level[x][y] == dungeon.WALL) {
+			return false;
+		}
+		return true;
+	};
+
+	this.fov = new ROT.FOV.PreciseShadowcasting(lightPasses);
+
+};
+
+Dungeon.prototype.addItem = function(item) {
+	this.level[item.posX][item.posY] = {
+		type: item.avatar,
+		visible: false,
+		item: item
+	}
 };
 
 Dungeon.prototype.render = function(display) {
@@ -33,9 +56,28 @@ Dungeon.prototype.render = function(display) {
 		for (var y=0; y < this.viewport.height; y++) {
 			var rendX = x + this.viewport.x;
 			var rendY = y + this.viewport.y;
-			display.draw(x, y, this.level[rendX][rendY].type);
+			var block = this.level[rendX][rendY];
+			var renderCharacter = block.type;
+			if (!block.visible) {
+				renderCharacter = ' ';
+			}
+			if(block.item) {
+				display.draw(x, y, renderCharacter, block.item.color);
+			}
+			else {
+				display.draw(x, y, renderCharacter);
+
+			}
 		}
 	}
+
+};
+
+Dungeon.prototype.calculateFov = function(playerX, playerY) {
+	/* output callback */
+	this.fov.compute(playerX, playerY, this.fovRadius, function(x, y, r, visibility) {
+		this.level[x][y].visible = true;
+	}.bind(this));
 };
 
 Dungeon.prototype.isWall = function(x, y) {
@@ -45,7 +87,8 @@ Dungeon.prototype.isWall = function(x, y) {
 Dungeon.prototype.centerViewport = function(x, y) {
 	this.viewport.x = x - this.viewport.width / 2;
 	this.viewport.y = y - this.viewport.height / 2;
-
-	// TODO: check for bounds to make sure viewport doesn't extend beyond bounds
 };
 
+Dungeon.prototype.setFovRadius = function(r) {
+	this.fovRadius = r;
+};
