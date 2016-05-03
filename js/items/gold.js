@@ -1,7 +1,6 @@
 
 
 function Gold(x,y) {
-	console.log("gold constructor");
 	Item.call(this, x, y, 'G');
 }
 

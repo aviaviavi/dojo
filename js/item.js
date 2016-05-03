@@ -1,6 +1,5 @@
 
 var Item = function(x, y, avatar, color) {
-	console.log("item constructor");
 	this.avatar = avatar;
 	this.color = color || "red";
 	this.posX = x;

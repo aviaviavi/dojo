@@ -53,7 +53,6 @@ Dungeon.prototype.addItem = function(item) {
 };
 
 Dungeon.prototype.removeItem = function(item){
-	console.log('nulling!');
 	this.level[item.posX][item.posY].item = null;
 	this.level[item.posX][item.posY].type = this.EMPTY;
 
