@@ -45,7 +45,7 @@ function createTestItems() {
 		var room = rooms[i];
 		var x = Math.floor(Math.random() * (room.getRight() - room.getLeft()) + room.getLeft());
 		var y = Math.floor(Math.random() * (room.getBottom() - room.getTop()) + room.getTop());
-		items.push(new Item(x, y, 'T'));
+		items.push(new Gold(x, y));
 	}
 	return items;
 }
@@ -55,6 +55,7 @@ function render() {
 	dungeon.centerViewport(player.posX, player.posY);
 	dungeon.render(display);
 	player.render(display, dungeon.viewport);
+	display.drawText(5,  2, player.score());
 }
 
 function bindEvents() {
@@ -94,14 +95,17 @@ function handleKeyPress(key) {
 
 function turn() {
 	dungeon.calculateFov(player.posX, player.posY);
-	render();
 
 	processEvents();
+	render();
 }
 
 function processEvents() {
 	// collision detection
 	$.each(items, function(idx, item) {
+		if (item == null) {
+			return;
+		}
 		if (player.posX === item.posX && player.posY === item.posY) {
 			item.collide(player, dungeon);
 		}

@@ -10,6 +10,7 @@ var Viewport = function(viewportWidth, viewportHeight) {
 var Dungeon = function(dungeonWidth, dungeonHeight, viewportWidth, viewportHeight) {
 
 	this.WALL = "#";
+	this.EMPTY = ".";
 	this.fovRadius = 3;
 
 	this.width = dungeonWidth;
@@ -49,6 +50,15 @@ Dungeon.prototype.addItem = function(item) {
 		visible: false,
 		item: item
 	}
+};
+
+Dungeon.prototype.removeItem = function(item){
+	console.log('nulling!');
+	this.level[item.posX][item.posY].item = null;
+	this.level[item.posX][item.posY].type = this.EMPTY;
+
+	items.splice(items.indexOf(item), 1);
+
 };
 
 Dungeon.prototype.render = function(display) {
